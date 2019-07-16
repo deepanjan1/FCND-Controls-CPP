@@ -7,6 +7,7 @@
 #include "Trajectory.h"
 #include "BaseController.h"
 #include "Math/Mat3x3F.h"
+#include "Math/Constants.h"
 
 #ifdef __PX4_NUTTX
 #include <systemlib/param/param.h>
@@ -18,7 +19,7 @@ void QuadControl::Init()
 
   // variables needed for integral control
   integratedAltitudeError = 0;
-    
+
 #ifndef __PX4_NUTTX
   // Load params from simulator parameter system
   ParamsHandle config = SimpleConfig::GetInstance();
@@ -222,7 +223,24 @@ float QuadControl::YawControl(float yawCmd, float yaw)
   float yawRateCmd=0;
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  // ensure yawCmd is between 0 and 2*pi
+  
+  if (yawCmd > 0) {
+    yawCmd = fmodf(yawCmd, 2.0*F_PI);
+  } else {
+    yawCmd = -fmodf(yawCmd, 2.0*F_PI);
+  }
 
+  yaw_err = yawCmd - yaw
+
+  if (yaw_error > F_PI) {
+    yaw_error = yaw_error - 2.0*F_PI;
+  } else if (yaw_error < -F_PI)
+  {
+    yaw_error = yaw_error + 2.0*F_PI;
+  }
+  
+  yawRateCmd = yaw_error*kpYaw
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return yawRateCmd;
