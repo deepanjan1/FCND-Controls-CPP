@@ -71,10 +71,30 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  // perpendicular distance to axis
+  float l = L / (sqrtf(2.f));
+
   cmd.desiredThrustsN[0] = mass * 9.81f / 4.f; // front left
   cmd.desiredThrustsN[1] = mass * 9.81f / 4.f; // front right
   cmd.desiredThrustsN[2] = mass * 9.81f / 4.f; // rear left
   cmd.desiredThrustsN[3] = mass * 9.81f / 4.f; // rear right
+
+  // terms are created using formula for moment and Ft
+  float first_term;
+  float second_term;
+  float third_term;
+  float fourth_term;
+
+  first_term = momentCmd.x/l;
+  second_term = momentCmd.y/l;
+  third_term = -momentCmd.z/kappa;
+  fourth_term = -collThrustCmd;
+  
+  cmd.desiredThrustsN[0] = (first_term + second_term + third_term + fourth_term)/4.f;
+  cmd.desiredThrustsN[1] = (-first_term + second_term - third_term + fourth_term)/4.f;
+  cmd.desiredThrustsN[2] = (first_term - second_term - third_term + fourth_term)/4.f; 
+  cmd.desiredThrustsN[3] = (-first_term - second_term + third_term + fourth_term)/4.f; 
+
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -98,8 +118,13 @@ V3F QuadControl::BodyRateControl(V3F pqrCmd, V3F pqr)
   V3F momentCmd;
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  V3F I;
 
+  I.x = Ixx;
+  I.y = Iyy;
+  I.z = Izz;
   
+  momentCmd = I * kpPQR * (pqrCmd - pqr);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -162,25 +187,25 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
   
-  float p_term = kpPosZ * (posZCmd - posZ);
+  // float p_term = kpPosZ * (posZCmd - posZ);
 
-  float alt_error_accumulated;
+  // float alt_error_accumulated;
 
-  alt_error_accumulated += (posZCmd - posZ)*dt;
+  // alt_error_accumulated += (posZCmd - posZ)*dt;
 
-  float i_term = KiPosZ * alt_error_accumulated;
+  // float i_term = KiPosZ * alt_error_accumulated;
 
-  float d_term = kpVelZ * (velZCmd - velZ);
+  // float d_term = kpVelZ * (velZCmd - velZ);
 
-  float u_bar_1 = p_term + d_term + i_term + accelZCmd;
+  // float u_bar_1 = p_term + d_term + i_term + accelZCmd;
 
-  float b_z = R(1,2);
+  // float b_z = R(1,2);
 
-  float c = (u_bar_1 - CONST_GRAVITY)/b_z;
+  // float c = (u_bar_1 - CONST_GRAVITY)/b_z;
 
-  float acc = CONSTRAIN(c, -maxAscentRate / dt, maxDescentRate/dt);
+  // float acc = CONSTRAIN(c, -maxAscentRate / dt, maxDescentRate/dt);
 
-  thrust = -mass*acc;
+  // thrust = -mass*acc;
   /////////////////////////////// END STUDENT CODE ////////////////////////////
   
   return thrust;
@@ -216,25 +241,25 @@ V3F QuadControl::LateralPositionControl(V3F posCmd, V3F velCmd, V3F pos, V3F vel
   V3F accelCmd = accelCmdFF;
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-  V3F kpPos;
-  kpPos.x = kpPosXY;
-  kpPos.y = kpPosXY;
-  kpPos.z = 0.f;
+  // V3F kpPos;
+  // kpPos.x = kpPosXY;
+  // kpPos.y = kpPosXY;
+  // kpPos.z = 0.f;
   
-  V3F kpVel;
-  kpVel.x = kpVelXY;
-  kpVel.y = kpVelXY;
-  kpVel.z = 0.f;
+  // V3F kpVel;
+  // kpVel.x = kpVelXY;
+  // kpVel.y = kpVelXY;
+  // kpVel.z = 0.f;
 
-  velCmd = kpPos*(posCmd - pos);
+  // velCmd = kpPos*(posCmd - pos);
 
-  V3F velNorm = velCmd.norm();
+  // V3F velNorm = velCmd.norm();
 
-  if (velCmd.mag() > maxSpeedXY) {
-    velCmd = velCmd*maxSpeedXY / velNorm;
-  }
+  // if (velCmd.mag() > maxSpeedXY) {
+  //   velCmd = velCmd*maxSpeedXY / velNorm;
+  // }
 
-  accelCmd = accelCmdFF + kpPos*(posCmd - pos) + kpVel*(velCmd - vel);
+  // accelCmd = accelCmdFF + kpPos*(posCmd - pos) + kpVel*(velCmd - vel);
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return accelCmd;
@@ -258,22 +283,22 @@ float QuadControl::YawControl(float yawCmd, float yaw)
 
   // ensure yawCmd is between 0 and 2*pi
   
-  if (yawCmd > 0) {
-    yawCmd = fmodf(yawCmd, 2.0*F_PI);
-  } else {
-    yawCmd = -fmodf(yawCmd, 2.0*F_PI);
-  }
+  // if (yawCmd > 0) {
+  //   yawCmd = fmodf(yawCmd, 2.0*F_PI);
+  // } else {
+  //   yawCmd = -fmodf(yawCmd, 2.0*F_PI);
+  // }
 
-  float yaw_err = yawCmd - yaw;
+  // float yaw_err = yawCmd - yaw;
 
-  if (yaw_err > F_PI) {
-    yaw_err = yaw_err - 2.0*F_PI;
-  } else if (yaw_err < -F_PI)
-  {
-    yaw_err = yaw_err + 2.0*F_PI;
-  }
+  // if (yaw_err > F_PI) {
+  //   yaw_err = yaw_err - 2.0*F_PI;
+  // } else if (yaw_err < -F_PI)
+  // {
+  //   yaw_err = yaw_err + 2.0*F_PI;
+  // }
   
-  yawRateCmd = yaw_err*kpYaw;
+  // yawRateCmd = yaw_err*kpYaw;
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return yawRateCmd;
