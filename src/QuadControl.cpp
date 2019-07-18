@@ -155,8 +155,30 @@ V3F QuadControl::RollPitchControl(V3F accelCmd, Quaternion<float> attitude, floa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  // Z element is 0
+  pqrCmd.z = 0;
   
+  // convert collThrustCmd to acceleration
+  float collAccelCmd = collThrustCmd / mass;
+  float p_cmd;
+  float q_cmd;
 
+  if (collThrustCmd > 0.0)
+  {
+    float r_target_13 = -CONSTRAIN(accelCmd.x/collAccelCmd, -maxTiltAngle, maxTiltAngle);
+    float r_target_23 = -CONSTRAIN(accelCmd.y/collAccelCmd, -maxTiltAngle, maxTiltAngle);
+
+    p_cmd = (1 / R(2, 2)) * (-R(1, 0) * kpBank * (R(0, 2) - r_target_13)) + (R(0, 0)) * kpBank * (R(1, 2) - r_target_23);
+    q_cmd = (1 / R(2, 2)) * (-R(1, 1) * kpBank * (R(0, 2) - r_target_13)) + (R(0, 1)) * kpBank * (R(1, 2) - r_target_23);
+  } else {
+    printf("negative thrust command");
+    p_cmd = 0.0;
+    q_cmd = 0.0;
+    float thrust_cmd = 0.0;
+  }
+
+  pqrCmd.x = p_cmd;
+  pqrCmd.y = q_cmd;
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return pqrCmd;
