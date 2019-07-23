@@ -1,3 +1,31 @@
+# 3D Controls Project Writeup
+
+## Implemented Body Rate Controller ##
+* Modified `GenerateMotorCommands()` to be dependent on the moment and collective thrust command.
+* Modified `BodyRateControl()` to be dependent on moments.
+* Tuned value to `kpPQR = 95, 95, 7`
+
+## Implemented Roll Pitch Controller ##
+* Calculated desired pitch and roll angle rates based on lateral acceleration, current altitude of the drone, and the collective thrust command.
+* Tuned value to `kpBank = 10`
+
+## Implemented Altitude, Lateral, and Yaw Controller ##
+* calculated the "p-term", "i-term", and "d-term" to calculate \overline{u}.  This was used to determine the acceleration in the z direction and clipped to account for `maxAscentRate` and `maxDescentRate`.  In addition, an integrator was added to deal with the difference in masses for vehicles (needed for Scenario 4)
+
+* calculated the command lateral acceleration based on current XY values and the target XY values.  
+
+* Tuned parameters as follows:
+  * `kpPosXY = 2`
+  * `kpPosZ = 10`
+  * `kpVelXY = 8`
+  * `kpVelZ = 30` 
+
+* Adjusted `YawControl()` to ensure second drone yaws in the proper direction.  Ensured yaw command was between 0 and 2*\pi. 
+* Tuned the parameters as follows:
+  * `kpYaw = 2`
+
+
+---
 # The C++ Project Readme #
 
 This is the readme for the C++ project.
